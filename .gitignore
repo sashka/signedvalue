@@ -1,0 +1,4 @@
+fuzz/crashers
+fuzz/suppressions
+*.zip
+

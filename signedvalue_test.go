@@ -102,7 +102,7 @@ const present = 1300000000
 const past = present - 86400*31
 const future = present + 86400*31
 
-var secretKeys = map[int]string{
+var secrets = map[int]string{
 	0: "ajklasdf0ojaisdf",
 	1: "aslkjasaolwkjsdf",
 }
@@ -271,12 +271,12 @@ func TestKeyVersioningReadWriteNonDefaultKey(t *testing.T) {
 	name := "key"
 	value := "\xe9"
 
-	signed, err := EncodeWithKeyVersioning(secretKeys, 1, name, value)
+	signed, err := EncodeWithKeyVersioning(secrets, 1, name, value)
 	if err != nil {
 		t.Fatalf(`EncodeWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
 	}
 
-	decoded, err := DecodeWithKeyVersioning(secretKeys, name, signed, 0)
+	decoded, err := DecodeWithKeyVersioning(secrets, name, signed, 0)
 	if err != nil || decoded != value {
 		t.Fatalf(`DecodeWithKeyVersioning: want ("%v", "%v"), got ("%v", "%v")`, value, nil, decoded, err)
 	}
@@ -286,15 +286,15 @@ func TestKeyVersioningInvalidKey(t *testing.T) {
 	name := "key"
 	value := "\xe9"
 
-	signed, err := EncodeWithKeyVersioning(secretKeys, 0, name, value)
+	signed, err := EncodeWithKeyVersioning(secrets, 0, name, value)
 	if err != nil {
 		t.Fatalf(`EncodeWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
 	}
 
 	// Remove 0th secret key from the global map.
-	delete(secretKeys, 0)
+	delete(secrets, 0)
 
-	decoded, err := DecodeWithKeyVersioning(secretKeys, name, signed, 0)
+	decoded, err := DecodeWithKeyVersioning(secrets, name, signed, 0)
 	if err != ErrInvalidKey || decoded != "" {
 		t.Fatalf(`DecodeWithKeyVersioning: want ("%v", "%v"), got ("%v", "%v")`, "", ErrInvalidKey, decoded, err)
 	}
@@ -318,11 +318,11 @@ func TestPublicMethods(t *testing.T) {
 	}
 
 	// Versioned secret key
-	signed, err = EncodeWithKeyVersioning(secretKeys, 1, name, value)
+	signed, err = EncodeWithKeyVersioning(secrets, 1, name, value)
 	if err != nil {
 		t.Fatalf(`EncodeWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
 	}
-	decoded, err = DecodeWithKeyVersioning(secretKeys, name, signed, 0)
+	decoded, err = DecodeWithKeyVersioning(secrets, name, signed, 0)
 	if err != nil || decoded != value {
 		t.Fatalf(`DecodeWithKeyVersioning: want ("%v", "%v"), got ("%v", "%v")`, value, nil, decoded, err)
 	}
