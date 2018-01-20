@@ -280,18 +280,27 @@ func consumeField(s string, offset int) (value string, next int, err error) {
 		return "", -1, ErrMalformedField
 	}
 
+	// Check field length for leading zeros.
+	// It means "0" length is valid, but "00" is invalid.
+	if lsep > 1 && field[0] == '0' {
+		return "", -1, ErrMalformedField
+	}
+
 	// Read field length.
-	n, err := strconv.Atoi(field[:lsep])
+	n, err := strconv.ParseUint(field[:lsep], 10, 64)
 	if err != nil {
 		return "", -1, ErrMalformedField
 	}
 
+	// Cast field length to int to make offset maths easier.
+	l := int(n)
+
 	// Ensure there's enough bytes left, and the field terminates exactly on a field separator.
-	if lsep+1+n != fsep {
+	if lsep+1+l != fsep {
 		return "", -1, ErrMalformedField
 	}
 
-	return field[lsep+1 : lsep+1+n], offset + lsep + n + 2, nil
+	return field[lsep+1 : lsep+1+l], offset + lsep + l + 2, nil
 }
 
 func consumeIntField(s string, offset int) (value int, next int, err error) {

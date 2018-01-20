@@ -23,6 +23,12 @@ func TestConsumeField(t *testing.T) {
 		{field: "0:11|", value: "", next: -1, err: ErrMalformedField},
 		{field: "8:|", value: "", next: -1, err: ErrMalformedField},
 		{field: "4:Hello|", value: "", next: -1, err: ErrMalformedField},
+		// prefixed length
+		{field: "-0:|", value: "", next: -1, err: ErrMalformedField},
+		{field: "+0:|", value: "", next: -1, err: ErrMalformedField},
+		{field: "+1:1|", value: "", next: -1, err: ErrMalformedField},
+		{field: "01:1|", value: "", next: -1, err: ErrMalformedField},
+		{field: "001:1|", value: "", next: -1, err: ErrMalformedField},
 		// malformed fields
 		{field: "|", value: "", next: -1, err: ErrMalformedField},
 		{field: ":|", value: "", next: -1, err: ErrMalformedField},
