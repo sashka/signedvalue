@@ -155,7 +155,6 @@ func decodeWithKeyVersioning(keys map[int]string, name string, signed string, ti
 		return "", err
 	}
 
-	// This method doesn't expect a versioned key.
 	key, found := keys[fields.KeyVersion]
 	if !found {
 		return "", ErrInvalidKey
