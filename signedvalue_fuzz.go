@@ -11,8 +11,8 @@ var secrets = map[int]string{
 func Fuzz(data []byte) int {
 	s := string(data)
 
-	// Fuzzing unversioned Encode -> Decode.
-	e1 := Encode(secret, "fuzz", s)
+	// Fuzzing unversioned Create -> Decode.
+	e1 := Create(secret, "fuzz", s)
 	if e1 == "" {
 		panic("e1 is empty")
 	}
@@ -24,8 +24,8 @@ func Fuzz(data []byte) int {
 		panic("d1 != s")
 	}
 
-	// Fuzzing versioned Encode -> Decode.
-	e2, err := EncodeWithKeyVersioning(secrets, 1, "fuzz", s)
+	// Fuzzing versioned Create -> Decode.
+	e2, err := CreateWithKeyVersioning(secrets, 1, "fuzz", s)
 	if e2 == "" {
 		panic("e2 is empty")
 	}
