@@ -99,22 +99,24 @@ func create(key string, keyVersion int, name string, value string, timestamp int
 		- value (base64-encoded)
 		- signature (hex-encoded; no length prefix)
 	*/
+	b := strings.Builder{}
+	b.Grow(len(value))
 
-	body := strings.Join(
-		[]string{
-			formatVersion,
-			formatField(strconv.Itoa(keyVersion)),
-			formatField(strconv.Itoa(timestamp)),
-			formatField(name),
-			formatField(base64.URLEncoding.EncodeToString([]byte(value))),
-			""},
-		fieldSep)
-	signature := createSignature(key, body)
-	return body + signature
+	b.WriteString(versionPrefix)
+	formatField(&b, strconv.Itoa(keyVersion))
+	formatField(&b, strconv.Itoa(timestamp))
+	formatField(&b, name)
+	formatField(&b, base64.URLEncoding.EncodeToString([]byte(value)))
+	b.WriteString(createSignature(key, b.String()))
+
+	return b.String()
 }
 
-func formatField(value string) string {
-	return strconv.Itoa(len(value)) + lenSep + value
+func formatField(b *strings.Builder, value string) {
+	b.WriteString(strconv.Itoa(len(value)))
+	b.WriteString(lenSep)
+	b.WriteString(value)
+	b.WriteString(fieldSep)
 }
 
 func createSignature(key string, s string) string {
@@ -260,7 +262,7 @@ func checkVersionPrefix(s string) (next int, err error) {
 	return vplen, nil
 }
 
-// consumeField decodes field at given offset and return it and an offset to the next field.
+// consumeField decodes field at given offset and return decoded field and an offset to the next field.
 func consumeField(s string, offset int) (value string, next int, err error) {
 	// Field bounds.
 	if len(s) < offset {
