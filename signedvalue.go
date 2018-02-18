@@ -36,10 +36,10 @@ var ErrValueDecodeFailed = errors.New("value decode failed")
 // ErrMalformedField means that a field is broken and cannot be decoded properly.
 var ErrMalformedField = errors.New("malformed field")
 
-// Encode creates signed and timestamped string so the string cannot be forged.
+// Create creates signed and timestamped string so the string cannot be forged.
 // This method doesn't support secret key versioning.
-func Encode(key string, name string, value string) string {
-	return encode(key, 0, name, value, timestamp())
+func Create(key string, name string, value string) string {
+	return create(key, 0, name, value, timestamp())
 }
 
 // Decode decodes and returns the value if it validates.
@@ -48,13 +48,13 @@ func Decode(key string, name string, signed string, ttl int) (string, error) {
 	return decode(key, name, signed, timestamp(), ttl)
 }
 
-// EncodeWithKeyVersioning creates signed and timestamped string using the given secret key version.
-func EncodeWithKeyVersioning(keys map[int]string, keyVersion int, name string, value string) (string, error) {
+// CreateWithKeyVersioning creates signed and timestamped string using the given secret key version.
+func CreateWithKeyVersioning(keys map[int]string, keyVersion int, name string, value string) (string, error) {
 	key, found := keys[keyVersion]
 	if !found {
 		return "", ErrInvalidKey
 	}
-	return encode(key, keyVersion, name, value, timestamp()), nil
+	return create(key, keyVersion, name, value, timestamp()), nil
 }
 
 // DecodeWithKeyVersioning decodes and retures the value if it validates.
@@ -82,9 +82,9 @@ const lenSep string = ":"
 // versionPrefix is a pre-calculated mandatory prefix for every valid signed value.
 const versionPrefix string = formatVersion + fieldSep
 
-// encode signs and timestamps a given string with secret key.
+// create signs and timestamps a given string with secret key.
 // Secret key version is stored so it may be used upon decodeWithKeyVersioning.
-func encode(key string, keyVersion int, name string, value string, timestamp int) string {
+func create(key string, keyVersion int, name string, value string, timestamp int) string {
 	/*
 		The v2 format consists of a version number and a series of length-prefixed fields "%d:%s",
 		the last of which is a signature, all separated by pipes.

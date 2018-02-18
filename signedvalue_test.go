@@ -111,9 +111,9 @@ func TestKnownValues(t *testing.T) {
 	wantSigned := "2|1:0|10:1300000000|3:key|8:dmFsdWU=|3d4e60b996ff9c5d5788e333a0cba6f238a22c6c0f94788870e1a9ecd482e152"
 	wantDecoded := "value"
 
-	signed := encode(secret, 0, "key", wantDecoded, present)
+	signed := create(secret, 0, "key", wantDecoded, present)
 	if signed != wantSigned {
-		t.Fatalf(`createSignedValue: want "%v", got "%v"`, wantSigned, signed)
+		t.Fatalf(`create: want "%v", got "%v"`, wantSigned, signed)
 	}
 
 	decoded, err := decode(secret, "key", signed, present, 0)
@@ -124,7 +124,7 @@ func TestKnownValues(t *testing.T) {
 
 func TestNameSwap(t *testing.T) {
 	wantDecoded := ""
-	signed := encode(secret, 0, "key2", "value", present)
+	signed := create(secret, 0, "key2", "value", present)
 	decoded, err := decode(secret, "key1", signed, present, 0)
 	if err != ErrInvalidName || decoded != wantDecoded {
 		t.Fatalf(`decode: want ("%v", "%v"), got ("%v", "%v")`, wantDecoded, ErrInvalidName, decoded, err)
@@ -136,7 +136,7 @@ func TestExpired(t *testing.T) {
 	ttl := 30 * 86400
 
 	// Sign the value in the past.
-	signed := encode(secret, 0, "key1", value, past)
+	signed := create(secret, 0, "key1", value, past)
 
 	// Decode in the past. Should never fail.
 	decoded, err := decode(secret, "key1", signed, past, ttl)
@@ -156,7 +156,7 @@ func TestFuture(t *testing.T) {
 	ttl := 30 * 86400
 
 	// Sign the value in the future.
-	signed := encode(secret, 0, "key1", value, future)
+	signed := create(secret, 0, "key1", value, future)
 
 	// Decode in the future. Should never fail.
 	decoded, err := decode(secret, "key1", signed, future, ttl)
@@ -236,7 +236,7 @@ func TestNonASCII(t *testing.T) {
 	name := "hello"
 	value := "こんにちは"
 
-	signed := encode(secret, 0, name, value, present)
+	signed := create(secret, 0, name, value, present)
 	decoded, err := decode(secret, name, signed, present, 0)
 	if err != nil || decoded != value {
 		t.Fatalf(`decode: want ("%v", "%v"), got ("%v", "%v")`, value, err, decoded, err)
@@ -271,9 +271,9 @@ func TestKeyVersioningReadWriteNonDefaultKey(t *testing.T) {
 	name := "key"
 	value := "\xe9"
 
-	signed, err := EncodeWithKeyVersioning(secrets, 1, name, value)
+	signed, err := CreateWithKeyVersioning(secrets, 1, name, value)
 	if err != nil {
-		t.Fatalf(`EncodeWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
+		t.Fatalf(`CreateWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
 	}
 
 	decoded, err := DecodeWithKeyVersioning(secrets, name, signed, 0)
@@ -286,9 +286,9 @@ func TestKeyVersioningInvalidKey(t *testing.T) {
 	name := "key"
 	value := "\xe9"
 
-	signed, err := EncodeWithKeyVersioning(secrets, 0, name, value)
+	signed, err := CreateWithKeyVersioning(secrets, 0, name, value)
 	if err != nil {
-		t.Fatalf(`EncodeWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
+		t.Fatalf(`CreateWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
 	}
 
 	// Remove 0th secret key from the global map.
@@ -305,10 +305,10 @@ func TestPublicMethods(t *testing.T) {
 	value := "value"
 
 	// Unversioned secret key
-	signed := Encode(secret, name, value)
+	signed := Create(secret, name, value)
 	decoded, err := Decode(secret, name, signed, 0)
 	if err != nil || decoded != value {
-		t.Fatalf(`Encode: want ("%v", "%v"), got ("%v", "%v")`, value, nil, decoded, err)
+		t.Fatalf(`Create: want ("%v", "%v"), got ("%v", "%v")`, value, nil, decoded, err)
 	}
 
 	// Empty string
@@ -318,9 +318,9 @@ func TestPublicMethods(t *testing.T) {
 	}
 
 	// Versioned secret key
-	signed, err = EncodeWithKeyVersioning(secrets, 1, name, value)
+	signed, err = CreateWithKeyVersioning(secrets, 1, name, value)
 	if err != nil {
-		t.Fatalf(`EncodeWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
+		t.Fatalf(`CreateWithKeyVersioning: want (..., "%v"), got ("%v", "%v")`, nil, signed, err)
 	}
 	decoded, err = DecodeWithKeyVersioning(secrets, name, signed, 0)
 	if err != nil || decoded != value {
@@ -334,7 +334,7 @@ var result string
 func BenchmarkNoKeyVersioningEncode(b *testing.B) {
 	var signed string
 	for n := 0; n < b.N; n++ {
-		signed = Encode(secret, "key", "value")
+		signed = Create(secret, "key", "value")
 	}
 
 	// Always store the result to a package level variable
@@ -343,7 +343,7 @@ func BenchmarkNoKeyVersioningEncode(b *testing.B) {
 }
 
 func BenchmarkNoKeyVersioningDecode(b *testing.B) {
-	signed := Encode(secret, "key", "value")
+	signed := Create(secret, "key", "value")
 	var decoded string
 	for n := 0; n < b.N; n++ {
 		decoded, _ = Decode(signed, "key", signed, 10)
