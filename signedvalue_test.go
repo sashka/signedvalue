@@ -331,7 +331,7 @@ func TestPublicMethods(t *testing.T) {
 // Benchmarking
 var result string
 
-func BenchmarkNoKeyVersioningEncode(b *testing.B) {
+func BenchmarkNoKeyVersioningCreate(b *testing.B) {
 	var signed string
 	for n := 0; n < b.N; n++ {
 		signed = Create(secret, "key", "value")
