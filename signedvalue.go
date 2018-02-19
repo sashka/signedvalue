@@ -100,7 +100,9 @@ func create(key string, keyVersion int, name string, value string, timestamp int
 		- signature (hex-encoded; no length prefix)
 	*/
 	b := strings.Builder{}
-	b.Grow(len(value))
+
+	// Preallocate more to reduce a number of underground array re-allocations.
+	b.Grow(100 + len(value)*2)
 
 	b.WriteString(versionPrefix)
 	formatField(&b, strconv.Itoa(keyVersion))
