@@ -64,10 +64,7 @@ func DecodeWithKeyVersioning(keys map[int]string, name string, signed string, tt
 
 // timestamp returns the current timestamp, in seconds.
 func timestamp() int {
-	// UTC timestamp was used here before, but Tornado uses "time.time()" which is local time,
-	// so I switched current timestamp getter to local time too.
-	// return int(time.Now().UTC().Unix())
-	return int(time.Now().Unix())
+	return int(time.Now().UTC().Unix())
 }
 
 // As I mentioned before, only v2 format is supported.
