@@ -1,6 +1,10 @@
 signedvalue
 ===========
 
+[![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
+
+[godocs]: https://godoc.org/github.com/sashka/signedvalue
+
 signedvalue is an implementation of signed and timestamped strings compatible with Tornado's
 `create_signed_value`, `decode_signed_value`, and therefore
 [set_secure_cookie](http://www.tornadoweb.org/en/stable/web.html#tornado.web.RequestHandler.set_secure_cookie) and
